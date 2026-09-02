@@ -1,9 +1,12 @@
+import 'package:code_assets/code_assets.dart';
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 import 'package:hooks/hooks.dart';
+
 import 'dart:io';
 
 void main(List<String> args) async {
   await build(args, (input, output) async {
+    if (input.config.code.targetOS == OS.android) return;
     final packageName = input.packageName;
     final cbuilder = CBuilder.library(
       name: packageName,
@@ -24,18 +27,13 @@ void main(List<String> args) async {
         if (Platform.isMacOS || Platform.isIOS) 'Vision',
         if (Platform.isMacOS || Platform.isIOS) 'Foundation',
       ],
-      libraries: [
-        if (Platform.isWindows) 'windowsapp',
-      ],
+      libraries: [if (Platform.isWindows) 'windowsapp'],
       flags: [
         if (Platform.isMacOS || Platform.isIOS) '-fobjc-arc',
         if (Platform.isWindows) '/std:c++17',
         if (Platform.isWindows) '/EHsc',
       ],
     );
-    await cbuilder.run(
-      input: input,
-      output: output,
-    );
+    await cbuilder.run(input: input, output: output);
   });
 }
